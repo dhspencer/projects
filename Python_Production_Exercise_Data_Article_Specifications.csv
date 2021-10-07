@@ -1,0 +1,6 @@
+article,sacks_per_meter,target_speed[meters/min]
+A1,0.0012,450
+A2,0.005,600
+X1,0.04,600
+X3,0.0031,700
+P1,0.001,450
