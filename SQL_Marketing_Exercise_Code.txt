@@ -1,0 +1,70 @@
+WITH cte_lead (date, channel, hearings, leads, no_leads, date_check)
+AS
+(
+SELECT (lead_date) AS date,
+CASE
+	WHEN marketing_channel = 'seo' THEN 'Search'
+	WHEN marketing_channel = 'native' THEN 'Native'
+	WHEN marketing_channel = 'social network' THEN 'Social'
+END AS channel,
+COUNT(CASE WHEN appointment_type LIKE 'Hearing%' THEN appointment_type ELSE NULL END) AS hearings,
+COUNT(CASE WHEN lead_id <> 0 THEN 1 END) AS leads,
+COUNT(CASE WHEN lead_id = 0 THEN 1 END) AS no_leads,
+COUNT(CASE WHEN appointment_date < lead_date THEN appointment_date ELSE NULL END) AS date_check
+FROM lead_data
+GROUP BY date, channel
+)
+
+SELECT
+m.date,
+m.marketing_channel,
+m.impressions,
+m.clicks,
+m.cost, 
+l.hearings,
+l.leads,
+l.no_leads,
+l.date_check
+FROM marketing_data m
+LEFT JOIN cte_lead l
+ON l.date = m.date
+AND l.channel = m.marketing_channel
+GROUP BY m.date, m.marketing_channel, m.impressions, m.clicks, m.cost, l.hearings, l.leads, l.no_leads, l.date_check
+
+UNION
+
+(WITH cte_lead (date, channel, hearings, leads, no_leads, date_check)
+AS
+(
+SELECT (lead_date) AS date,
+CASE
+	WHEN marketing_channel = 'seo' THEN 'Search'
+	WHEN marketing_channel = 'native' THEN 'Native'
+	WHEN marketing_channel = 'social network' THEN 'Social'
+END AS channel,
+COUNT(CASE WHEN appointment_type LIKE 'Hearing%' THEN appointment_type ELSE NULL END) AS appointments,
+COUNT(CASE WHEN lead_id <> 0 THEN 1 END) AS leads,
+COUNT(CASE WHEN lead_id = 0 THEN 1 END) AS no_leads,
+COUNT(CASE WHEN appointment_date < lead_date THEN appointment_date ELSE NULL END) AS date_check
+FROM lead_data
+GROUP BY date, channel
+)
+
+SELECT
+l.date,
+l.channel,
+m.impressions,
+m.clicks,
+m.cost, 
+l.hearings,
+l.leads,
+l.no_leads,
+l.date_check
+FROM marketing_data m
+RIGHT JOIN cte_lead l
+ON l.date = m.date
+AND l.channel = m.marketing_channel
+GROUP BY l.date, l.channel, m.impressions, m.clicks, m.cost, l.hearings, l.leads, l.no_leads, l.date_check
+
+)
+ORDER BY 1
