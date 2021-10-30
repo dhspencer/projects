@@ -1,0 +1,27 @@
+Insert values into tables:
+
+INSERT INTO companies
+VALUES('Alice s.p.','Wonderland')
+,('Y-zap','Wonderland')
+,('Absolute','Mathlands')
+,('Arcus t.g.','Mathlands')
+,('Lil Mermaid','Underwater Kingdom')
+,('None at all','Nothingland')
+
+INSERT INTO trades
+VALUES(20121107,'Lil Mermaid','Alice s.p.',10)
+,(20123112,'Arcus t.g.','Y-zap',30)
+,(20120125,'Alice s.p.','Arcus t.g.',100)
+,(20120216,'Lil Mermaid','Absolute',30)
+,(20120217,'Lil Mermaid','Absolute',50)
+
+Solution:
+
+SELECT country,
+SUM(CASE WHEN c.name = t.seller THEN value ELSE 0 END) AS export,
+SUM(CASE WHEN c.name = t.buyer THEN value ELSE 0 END) AS import
+FROM companies c
+LEFT JOIN trades t
+ON c.name = t.seller OR c.name = t.buyer
+GROUP BY country
+ORDER BY country
